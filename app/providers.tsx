@@ -4,12 +4,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { arcTestnet, ARC_TESTNET_RPC } from "@/lib/arc";
+import { arcMainnet, ARC_MAINNET_RPC } from "@/lib/arc";
 
 const config = createConfig({
-  chains: [arcTestnet],
+  chains: [arcMainnet],
   connectors: [injected()],
-  transports: { [arcTestnet.id]: http(ARC_TESTNET_RPC) },
+  transports: { [arcMainnet.id]: http(ARC_MAINNET_RPC) },
   ssr: true,
 });
 

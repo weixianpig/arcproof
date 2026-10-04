@@ -10,7 +10,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { type Hash } from "viem";
-import { arcTestnet, registryAddress } from "@/lib/arc";
+import { arcMainnet, registryAddress } from "@/lib/arc";
 import { proofRegistryAbi } from "@/lib/contract";
 import { hashFile } from "@/lib/hash";
 
@@ -25,7 +25,7 @@ const short = (value: string) => `${value.slice(0, 8)}…${value.slice(-6)}`;
 const friendlyError = (error: unknown) => {
   const message = error instanceof Error ? error.message : "Something went wrong.";
   if (/rejected|denied|cancelled/i.test(message)) return "Request cancelled in your wallet.";
-  if (/insufficient funds/i.test(message)) return "Your wallet needs testnet USDC to pay Arc gas.";
+  if (/insufficient funds/i.test(message)) return "Your wallet needs USDC on Arc to pay gas.";
   return message.split("\n")[0];
 };
 
@@ -42,10 +42,10 @@ export default function Home() {
   const { disconnect } = useDisconnect();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
-  const client = usePublicClient({ chainId: arcTestnet.id });
+  const client = usePublicClient({ chainId: arcMainnet.id });
 
-  const explorer = arcTestnet.blockExplorers.default.url;
-  const wrongNetwork = isConnected && chainId !== arcTestnet.id;
+  const explorer = arcMainnet.blockExplorers.default.url;
+  const wrongNetwork = isConnected && chainId !== arcMainnet.id;
 
   const findProof = useCallback(async (hash: Hash) => {
     if (!registryAddress || !client) return undefined;
@@ -90,7 +90,7 @@ export default function Home() {
     try {
       const hash = await hashFile(file);
       setFileHash(hash);
-      setStatus(registryAddress ? "Checking Arc Testnet…" : "File hashed. Add a deployed contract address to register or verify.");
+      setStatus(registryAddress ? "Checking Arc Mainnet…" : "File hashed. Add a deployed contract address to register or verify.");
       const existing = await findProof(hash);
       if (existing) {
         setProof(existing);
@@ -111,16 +111,14 @@ export default function Home() {
     setBusy(true);
     setError("");
     try {
-      if (chainId !== arcTestnet.id) await switchChainAsync({ chainId: arcTestnet.id });
+      if (chainId !== arcMainnet.id) await switchChainAsync({ chainId: arcMainnet.id });
       setStatus("Confirm the registration in your wallet…");
       const transactionHash = await writeContractAsync({
-        chainId: arcTestnet.id,
+        chainId: arcMainnet.id,
         address: registryAddress,
         abi: proofRegistryAbi,
         functionName: "registerProof",
         args: [fileHash],
-        maxFeePerGas: BigInt(20_000_000_000),
-        maxPriorityFeePerGas: BigInt(0),
       });
       setStatus("Waiting for Arc finality…");
       await client.waitForTransactionReceipt({ hash: transactionHash });
@@ -145,7 +143,7 @@ export default function Home() {
     <main className="shell">
       <nav>
         <a className="brand" href="#">Arc<span>Proof</span></a>
-        <div className="network"><i /> Arc Testnet</div>
+        <div className="network"><i /> Arc Mainnet</div>
       </nav>
 
       <section className="hero">
@@ -170,7 +168,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="step second"><span>02</span><div><strong>Anchor or verify</strong><small>On Arc Testnet</small></div></div>
+        <div className="step second"><span>02</span><div><strong>Anchor or verify</strong><small>On Arc Mainnet</small></div></div>
 
         {!isConnected ? (
           <button className="button primary" disabled={connecting} onClick={() => connect({ connector: connectors[0] })}>
@@ -178,7 +176,7 @@ export default function Home() {
           </button>
         ) : (
           <div className="walletRow">
-            <div><i /><span>{short(address!)}</span><small>{wrongNetwork ? "Wrong network" : "Arc Testnet"}</small></div>
+            <div><i /><span>{short(address!)}</span><small>{wrongNetwork ? "Wrong network" : "Arc Mainnet"}</small></div>
             <button onClick={() => disconnect()}>Disconnect</button>
           </div>
         )}
@@ -203,7 +201,7 @@ export default function Home() {
               <div><dt>Block</dt><dd>{proof.blockNumber.toString()}</dd></div>
             </dl>
             <div className="proofActions">
-              {proof.transactionHash && <a href={`${explorer}/tx/${proof.transactionHash}`} target="_blank" rel="noreferrer">View on ArcScan ↗</a>}
+              {proof.transactionHash && <a href={`${explorer}/tx/${proof.transactionHash}`} target="_blank" rel="noreferrer">View on Arc Explorer ↗</a>}
               <button onClick={() => void copyVerificationLink()}>{copied ? "Copied!" : "Copy verification link"}</button>
             </div>
           </div>
@@ -219,7 +217,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <span>FILE</span><b>→</b><span>SHA-256</span><b>→</b><span>ARC TESTNET</span>
+        <span>FILE</span><b>→</b><span>SHA-256</span><b>→</b><span>ARC MAINNET</span>
         <p>No upload. No account. No database.</p>
       </footer>
     </main>

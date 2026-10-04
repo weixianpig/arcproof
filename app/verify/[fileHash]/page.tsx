@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { createPublicClient, http, isHash, type Hash } from "viem";
-import { arcTestnet, ARC_TESTNET_RPC, registryAddress } from "@/lib/arc";
+import { arcMainnet, ARC_MAINNET_RPC, registryAddress } from "@/lib/arc";
 import { proofRegistryAbi } from "@/lib/contract";
 
 export const dynamic = "force-dynamic";
 
 const client = createPublicClient({
-  chain: arcTestnet,
-  transport: http(ARC_TESTNET_RPC),
+  chain: arcMainnet,
+  transport: http(ARC_MAINNET_RPC),
 });
 
 type PageProps = { params: Promise<{ fileHash: string }> };
@@ -47,7 +47,7 @@ export default async function VerificationPage({ params }: PageProps) {
         proof = { owner, timestamp: BigInt(timestamp), blockNumber: BigInt(blockNumber), transactionHash: logs[0]?.transactionHash };
       }
     } catch {
-      readError = "Arc Testnet could not be reached. Try again shortly.";
+      readError = "Arc Mainnet could not be reached. Try again shortly.";
     }
   }
 
@@ -63,14 +63,14 @@ export default async function VerificationPage({ params }: PageProps) {
     <main className="shell">
       <nav>
         <Link className="brand" href="/">Arc<span>Proof</span></Link>
-        <div className="network"><i /> Arc Testnet</div>
+        <div className="network"><i /> Arc Mainnet</div>
       </nav>
       <section className="card verifyCard">
         {proof ? (
           <>
             <span className="verifiedMark">✓</span>
             <h1>ArcProof <em>Verified</em></h1>
-            <p className="lede">This file fingerprint has a timestamped record on Arc Testnet.</p>
+            <p className="lede">This file fingerprint has a timestamped record on Arc Mainnet.</p>
             <code className="verifyHash">{fileHash}</code>
             <div className="proof">
               <dl>
@@ -81,7 +81,7 @@ export default async function VerificationPage({ params }: PageProps) {
               </dl>
               {proof.transactionHash && (
                 <div className="proofActions">
-                  <a href={`${arcTestnet.blockExplorers.default.url}/tx/${proof.transactionHash}`} target="_blank" rel="noreferrer">View on ArcScan ↗</a>
+                  <a href={`${arcMainnet.blockExplorers.default.url}/tx/${proof.transactionHash}`} target="_blank" rel="noreferrer">View on Arc Explorer ↗</a>
                 </div>
               )}
             </div>
@@ -94,7 +94,7 @@ export default async function VerificationPage({ params }: PageProps) {
                 ? "This URL does not contain a valid SHA-256 hash."
                 : !registryAddress
                   ? "ArcProof is not connected to a deployed registry yet."
-                  : readError || "This hash has not been registered in the configured Arc Testnet registry."}
+                  : readError || "This hash has not been registered in the configured Arc Mainnet registry."}
             </p>
             {validHash && <code className="verifyHash">{fileHash}</code>}
           </>

@@ -34,7 +34,7 @@ EVM wallet
 ProofRegistry smart contract
     │
     ▼
-Arc public verification + ArcScan
+Arc public verification + Arc Explorer
 ```
 
 There is no backend, database, login, admin role, proxy, NFT, or custom token. `blockNumber` is stored so the frontend can retrieve the registration event and transaction hash with a one-block log query.
@@ -45,23 +45,26 @@ There is no backend, database, login, admin role, proxy, NFT, or custom token. `
 
 ## Network configuration
 
-The application runtime is intentionally restricted to Arc Testnet.
+The production application runs exclusively on Arc Mainnet.
 
-| Setting | Arc Testnet |
+| Setting | Arc Mainnet |
 | --- | --- |
-| Chain ID | `5042002` |
-| RPC | `https://rpc.testnet.arc.network/` |
-| Explorer | `https://testnet.arcscan.app` |
+| Chain ID | `5042` |
+| RPC | `https://rpc.mainnet.arc.io` |
+| Explorer | `https://explorer.arc.io` |
 | Native gas token | USDC, 18 decimals |
-| Minimum `maxFeePerGas` | 20 gwei |
 
-Verified testnet deployment:
+Verified mainnet deployment:
 
+- Contract: [`0x3443f82f20f20b12B8c6EDD79379CE265E729ccE`](https://explorer.arc.io/address/0x3443f82f20f20b12B8c6EDD79379CE265E729ccE)
+- Deployment transaction: [`0xe3725e926e34ef4a217dfa5175c2bcc5b04cf6ccab58391b29fbf349bbfd5bf1`](https://explorer.arc.io/tx/0xe3725e926e34ef4a217dfa5175c2bcc5b04cf6ccab58391b29fbf349bbfd5bf1)
+- Deployment block: `24277769`
+
+Historical testnet deployment:
+
+- Chain ID: `5042002`
 - Contract: [`0x60Bdf53BF9dB5821d032252DffCC95f20aA5C6e1`](https://testnet.arcscan.app/address/0x60Bdf53BF9dB5821d032252DffCC95f20aA5C6e1)
 - Deployment transaction: [`0x438c8986b0a792aed0a740e43d0466946609497eb6524bd0cc3e56639936abcb`](https://testnet.arcscan.app/tx/0x438c8986b0a792aed0a740e43d0466946609497eb6524bd0cc3e56639936abcb)
-- Creation block: `65426425`
-
-Mainnet is defined separately for future readiness but is not exposed by the wallet provider. The official configuration currently recorded for future review is chain ID `5042`, RPC `https://rpc.mainnet.arc.io`, and explorer `https://explorer.arc.io`. Recheck these against the [official Arc RPC reference](https://docs.arc.io/arc/references/rpc-endpoints) immediately before deployment.
 
 ## Running locally
 
@@ -87,29 +90,30 @@ npm run build
 
 Contract tests compile Solidity, deploy to an in-memory EVM, and verify registration, lookup, duplicate rejection, and zero-hash rejection. Hash tests cover a standard SHA-256 vector, filename independence, and distinct contents.
 
-## Testnet deployment
+## Contract deployment
 
-Use [Arc Foundry](https://docs.arc.io/arc/tutorials/install-arc-foundry) with a password-protected local keystore or hardware wallet. Never put a seed phrase or raw private key in this repository or a shell command. Fund the deployer with testnet USDC from the [Circle faucet](https://faucet.circle.com).
+Use [Arc Foundry](https://docs.arc.io/arc/tutorials/install-arc-foundry) with a password-protected local keystore or hardware wallet. Never put a seed phrase or raw private key in this repository or a shell command. Arc uses native USDC for gas.
 
 Import a dedicated testnet key directly into Foundry's encrypted keystore from a private terminal:
 
 ```bash
-arc-cast wallet import arcproof-testnet
+arc-cast wallet import arcproof-mainnet
 ```
 
 Before broadcasting, record the public deployer address and verify network and balance:
 
 ```bash
-arc-cast chain-id --rpc-url https://rpc.testnet.arc.network/
-arc-cast balance DEPLOYER_ADDRESS --ether --rpc-url https://rpc.testnet.arc.network/
+arc-cast chain-id --rpc-url https://rpc.mainnet.arc.io
+arc-cast balance DEPLOYER_ADDRESS --ether --rpc-url https://rpc.mainnet.arc.io
 ```
 
-The chain ID must be `5042002`. After reviewing the deployer address, balance, and gas estimate, the exact deployment command is:
+The chain ID must be `5042`. After reviewing the deployer address, balance, and gas estimate, deploy only with explicit approval:
 
 ```bash
 arc-forge create contracts/ProofRegistry.sol:ProofRegistry \
-  --rpc-url https://rpc.testnet.arc.network/ \
-  --account arcproof-testnet \
+  --rpc-url https://rpc.mainnet.arc.io \
+  --chain 5042 \
+  --account arcproof-mainnet \
   --broadcast
 ```
 
@@ -118,34 +122,26 @@ Do not run the broadcast command until the deployer address, balance, target net
 After deployment, place only the public address in `.env.local`:
 
 ```dotenv
-NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS=0x...
-NEXT_PUBLIC_ARC_TESTNET_RPC_URL=https://rpc.testnet.arc.network/
+NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS=0x3443f82f20f20b12B8c6EDD79379CE265E729ccE
+NEXT_PUBLIC_ARC_MAINNET_RPC_URL=https://rpc.mainnet.arc.io
 ```
 
-Restart the app and perform the three end-to-end checks: register a new fixture, reload and rediscover it, then select different content and confirm it has a different unregistered hash.
+Restart the app and verify contract reads before submitting a registration.
 
 ## Deploying the frontend
 
 ArcProof is a standard Next.js application and can be imported into Vercel without a custom build configuration. Configure these variables for Production, Preview, and Development:
 
 ```dotenv
-NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS=0x60Bdf53BF9dB5821d032252DffCC95f20aA5C6e1
-NEXT_PUBLIC_ARC_TESTNET_RPC_URL=https://rpc.testnet.arc.network/
+NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS=0x3443f82f20f20b12B8c6EDD79379CE265E729ccE
+NEXT_PUBLIC_ARC_MAINNET_RPC_URL=https://rpc.mainnet.arc.io
 ```
 
 The first variable is required. The second is recommended and otherwise defaults to the same public RPC. Neither value is secret. The homepage is statically generated, while `/verify/[fileHash]` is rendered on demand and reads Arc directly. Browser wallet registration remains client-side.
 
-## Mainnet deployment
+## Mainnet status
 
-**Status: not deployed.** ArcProof currently runs on Arc Testnet only. Mainnet deployment is not part of the current release. Before any future broadcast:
-
-1. Revalidate chain ID, RPC, explorer, fee rules, and Arc Foundry guidance against official Arc documentation.
-2. Create a separate encrypted mainnet keystore backed by a dedicated wallet.
-3. Complete the full test suite and Arc Testnet end-to-end workflow.
-4. Estimate deployment gas and convert it to the required native USDC amount.
-5. Display the deployer address, balance, exact network, estimated maximum fee, and exact command.
-6. Obtain explicit approval before broadcasting or signing anything.
-7. Configure a separate public mainnet registry address rather than overwriting testnet records.
+ArcProof is deployed on Arc Mainnet and the production frontend is configured for chain `5042`. The testnet chain definition remains in the source only as historical/development configuration; it is not included in the production wagmi provider.
 
 ## Security considerations
 
