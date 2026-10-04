@@ -1,0 +1,38 @@
+{
+  "name": "arcproof",
+  "version": "0.1.0",
+  "description": "Private, onchain file timestamping on Arc.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "contract:test": "tsx tests/ProofRegistry.test.ts",
+    "unit:test": "tsx --test tests/hash.test.ts",
+    "test": "npm run contract:test && npm run unit:test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.5",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.5",
+    "wagmi": "^2.19.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "^16.0.0",
+    "ganache": "^7.9.2",
+    "solc": "^0.8.30",
+    "tailwindcss": "^4.1.17",
+    "@tailwindcss/postcss": "^4.1.17",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

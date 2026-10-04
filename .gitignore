@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+
+# Next.js
+/.next
+/out
+
+# builds and coverage
+/artifacts
+/cache
+/coverage
+
+# environment files (templates are committed)
+.env
+.env.*
+!.env.example
+
+# local tooling
+/work
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# private keys and Foundry keystores
+*.key
+*.pem
+*.p12
+*.keystore
+wallets/
+keystore/
+broadcast/
