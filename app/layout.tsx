@@ -8,7 +8,7 @@ const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ArcProof",
-  description: "Prove a file existed without revealing the file.",
+  description: "Anchor private file and C2PA provenance commitments to Arc without uploading the original evidence.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

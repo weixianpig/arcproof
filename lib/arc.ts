@@ -23,7 +23,8 @@ export const arcTestnet = defineChain({
   },
 });
 
-// Readiness-only: the wallet provider intentionally exposes testnet alone.
+// Production chain. The wallet provider and all application reads/writes expose
+// this chain alone; the testnet definition above is retained only as history.
 export const arcMainnet = defineChain({
   id: 5_042,
   name: "Arc",
@@ -35,6 +36,8 @@ export const arcMainnet = defineChain({
   fees: { baseFeeMultiplier: 1.2, defaultPriorityFee: BigInt(0) },
 });
 
-export const registryAddress = process.env.NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS as
-  | `0x${string}`
-  | undefined;
+const configuredRegistryAddress = process.env.NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS;
+
+export const registryAddress = configuredRegistryAddress && /^0x[0-9a-fA-F]{40}$/.test(configuredRegistryAddress)
+  ? configuredRegistryAddress.toLowerCase() as `0x${string}`
+  : undefined;

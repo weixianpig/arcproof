@@ -9,6 +9,7 @@
 /artifacts
 /cache
 /coverage
+/public/vendor/c2pa
 
 # environment files (templates are committed)
 .env
